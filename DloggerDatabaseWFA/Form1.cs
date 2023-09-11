@@ -2,6 +2,9 @@ using System.IO;
 using System.Data;
 using System.Data.SqlClient;
 using System.CodeDom;
+using Telegram.Bot;
+using System;
+using Microsoft.Extensions.Configuration;
 
 namespace DloggerDatabaseWFA
 {
@@ -26,6 +29,7 @@ namespace DloggerDatabaseWFA
                 var club = cmbClub.SelectedItem.ToString();
                 MessageBox.Show($@"Save on D:\Prog\Log.txt", "ddipper");
                 WriteLog(id, name, action, club);
+                TelegramBotAsync(id, name, action, club);
             }
             catch (Exception ex)
             {
@@ -46,6 +50,9 @@ namespace DloggerDatabaseWFA
             if (cmd.ExecuteNonQuery() > 0)
                 MessageBox.Show("Row Update");
             con.Close();
+
+
+
         }
 
         private void WriteLog(string id, string name, string action, string club)
@@ -64,6 +71,35 @@ namespace DloggerDatabaseWFA
             string path = @"D:\Prog\Logs\log.txt";
 
             File.WriteAllText(path, log);
+        }
+
+        private async Task TelegramBotAsync(string id, string name, string action, string club)
+        {
+            var idMe = 892871556;
+            var idNik = 525820323;
+
+            var config = new ConfigurationBuilder()
+                .SetBasePath(AppContext.BaseDirectory)
+                .AddYamlFile("config.yml")
+                .Build();
+
+
+            var client = new TelegramBotClient(config["token"]);
+            using CancellationTokenSource cts = new();
+
+            var me = await client.GetMeAsync();
+
+            Console.WriteLine($"Start listening for @{me.Username}");
+
+            string log = $"Id: {id}\n" +
+             $"Name: {name}\n" +
+             $"Time: {DateTime.Now}\n" +
+             $"Action: {action}\n" +
+             $"Club: {club}";
+
+            client.SendTextMessageAsync(chatId: 892871556, text: $"{log}\nby ddipper with love <3");
+            client.SendTextMessageAsync(chatId: 525820323, text: $"{log}\nby ddipper with love <3");
+
         }
     }
 }
