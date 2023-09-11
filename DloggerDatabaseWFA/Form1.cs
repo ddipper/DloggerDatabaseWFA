@@ -1,4 +1,7 @@
 using System.IO;
+using System.Data;
+using System.Data.SqlClient;
+using System.CodeDom;
 
 namespace DloggerDatabaseWFA
 {
@@ -28,6 +31,21 @@ namespace DloggerDatabaseWFA
             {
                 MessageBox.Show("Select action or club", "System");
             }
+
+            SqlConnection con = new SqlConnection();
+            con.ConnectionString = "Data Source=Lenovo_s340\\SQLEXPRESS01;Initial Catalog=Dlogger_control_db;Integrated Security=True";
+            con.Open();
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandText = "insert into dbo.Users (Id, Name, Time, Action, Club) values (@id, @name, @time, @action, @club)";
+            cmd.Connection = con;
+            cmd.Parameters.AddWithValue("@id", tbId.Text);
+            cmd.Parameters.AddWithValue("@name", tbName.Text);
+            cmd.Parameters.AddWithValue("@time", DateTime.Now);
+            cmd.Parameters.AddWithValue("@action", cmbAction.SelectedItem.ToString());
+            cmd.Parameters.AddWithValue("@club", cmbClub.SelectedItem.ToString());
+            if (cmd.ExecuteNonQuery() > 0)
+                MessageBox.Show("Row Update");
+            con.Close();
         }
 
         private void WriteLog(string id, string name, string action, string club)
